@@ -22,3 +22,6 @@
 
 #excludes
 !libFlurry.a
+
+#MacOs
+.DS_Store
