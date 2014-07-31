@@ -35,16 +35,40 @@ extern "C"
 	void flurry_log_event_with_params_Ext(const char *anEventName, int aTimed, const char *aParamsAndKeys, int aParamCount){
 	    //flurry_log_event_with_params(const char *anEventName, int aTimed, const char **aParamKeys, const char **aParamValues, int aParamCount);
 	    char * str1 = new char [strlen(aParamsAndKeys)];
-	    strcpy(str1, aParamsAndKeys);
+        strcpy(str1, aParamsAndKeys);
 
-	    char * pch = strtok (str1,"\n");
-	    while (pch != NULL)                         // пока есть лексемы
-	    {
-	        fprintf(stderr, pch);
-	        pch = strtok (NULL, "\n");
-	    }
+        char * pch = strtok (str1,"\n");
+        char ** keysArray = new char*[aParamCount];
+        char ** valuesArray = new char*[aParamCount];
+        int arrayCount = 0;
+        while (pch != NULL)                         // пока есть лексемы
+        {
+            const char * oneValue = index(pch, '=');
+            oneValue++;
 
-	    delete [] str1;
+            valuesArray[arrayCount] = new char [strlen(oneValue)];
+            strcpy(valuesArray[arrayCount], oneValue);
+
+            int keyLen = (int)(oneValue - pch);
+            keysArray [arrayCount] =  new char [keyLen];
+            memset(keysArray [arrayCount] , 0, keyLen);
+            strncpy(keysArray[arrayCount], pch, keyLen-1);
+
+            pch = strtok (NULL, "\n");
+            arrayCount++;
+        }
+
+        flurry_log_event_with_params(anEventName, aTimed, (const char**)keysArray, (const char**)valuesArray, aParamCount);
+
+        for (int i = 0; i< aParamCount; i++)
+        {
+            delete keysArray[i];
+            delete valuesArray[i];
+        }
+        delete keysArray;
+        delete valuesArray;
+
+        delete [] str1;
 
 	}
 
